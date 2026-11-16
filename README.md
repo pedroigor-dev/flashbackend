@@ -82,14 +82,14 @@ O `.env` é ignorado pelo Git. Compartilhe apenas o `.env.example`, sem credenci
 
 ### Configuração dos provedores
 
-| Variável | Uso |
-| --- | --- |
-| `PORT` | Porta da API; padrão `4000` |
-| `AI_PROVIDER` | `groq` ou `huggingface`; o arquivo de exemplo seleciona Groq |
-| `GROQ_API_KEY` | Chave da Groq, exigida quando esse provedor está ativo |
-| `GROQ_MODEL` | Padrão `openai/gpt-oss-120b` |
-| `HF_TOKEN` | Token de inferência da Hugging Face |
-| `HF_MODEL` | Padrão `openai/gpt-oss-120b:cheapest` |
+| Variável       | Uso                                                          |
+| -------------- | ------------------------------------------------------------ |
+| `PORT`         | Porta da API; padrão `4000`                                  |
+| `AI_PROVIDER`  | `groq` ou `huggingface`; o arquivo de exemplo seleciona Groq |
+| `GROQ_API_KEY` | Chave da Groq, exigida quando esse provedor está ativo       |
+| `GROQ_MODEL`   | Padrão `openai/gpt-oss-120b`                                 |
+| `HF_TOKEN`     | Token de inferência da Hugging Face                          |
+| `HF_MODEL`     | Padrão `openai/gpt-oss-120b:cheapest`                        |
 
 Para Hugging Face, altere `AI_PROVIDER=huggingface` e preencha `HF_TOKEN`. Reinicie o servidor após mudar o `.env`. Se `AI_PROVIDER` for omitido, o código usa Hugging Face.
 
@@ -119,9 +119,7 @@ Informa se o serviço está ativo e se existe uma credencial configurada:
 
 ```json
 {
-  "messages": [
-    { "role": "user", "content": "O que é a Flash?" }
-  ]
+  "messages": [{ "role": "user", "content": "O que é a Flash?" }]
 }
 ```
 
@@ -151,14 +149,14 @@ $body = @{ messages = @(@{ role = 'user'; content = 'O que é a Flash?' }) } | C
 Invoke-RestMethod -Uri 'http://127.0.0.1:4000/api/chat' -Method Post -ContentType 'application/json; charset=utf-8' -Body ([System.Text.Encoding]::UTF8.GetBytes($body))
 ```
 
-| Status | Situação |
-| --- | --- |
-| `400` | Mensagem ou histórico inválido |
-| `413` | Corpo da requisição acima do limite |
-| `429` | Limite local ou do provedor atingido |
-| `502` | Falha de conexão ou resposta inválida do provedor |
-| `503` | Configuração, credencial, créditos ou plano indisponível |
-| `504` | Tempo limite ou interrupção da resposta |
+| Status | Situação                                                 |
+| ------ | -------------------------------------------------------- |
+| `400`  | Mensagem ou histórico inválido                           |
+| `413`  | Corpo da requisição acima do limite                      |
+| `429`  | Limite local ou do provedor atingido                     |
+| `502`  | Falha de conexão ou resposta inválida do provedor        |
+| `503`  | Configuração, credencial, créditos ou plano indisponível |
+| `504`  | Tempo limite ou interrupção da resposta                  |
 
 ## Organização
 
@@ -185,12 +183,12 @@ npm test
 
 O comando compila o backend e roda sete testes com o runner do Node.js. Eles cobrem ausência de credencial, contexto enviado ao modelo, tratamento seguro de falhas, validação e limite de requisições, além da separação entre as credenciais dos provedores. As chamadas externas são simuladas nos testes; não é necessário gastar créditos.
 
-| Comando | Uso |
-| --- | --- |
-| `npm run dev` | Desenvolvimento com recompilação |
-| `npm run build` | Compila para `dist/` |
-| `npm start` | Executa o build |
-| `npm test` | Compila e executa a suíte |
+| Comando         | Uso                              |
+| --------------- | -------------------------------- |
+| `npm run dev`   | Desenvolvimento com recompilação |
+| `npm run build` | Compila para `dist/`             |
+| `npm start`     | Executa o build                  |
+| `npm test`      | Compila e executa a suíte        |
 
 ## Limites e decisões
 
@@ -219,3 +217,14 @@ Revisada em 16/11/2026, a base cobre história, cultura, ética, arquitetura, mi
 O conteúdo é uma fotografia das fontes consultadas, não uma pesquisa automática a cada pergunta. Para atualizar, revise a fonte original, corrija o resumo e a data de consulta e teste perguntas reais. Datas de publicação não devem ser confundidas com início de práticas. A base mantém o escopo e o período dos relatos; divergências não devem ser resolvidas por suposição.
 
 As respostas podem desenvolver conceitos, exemplos hipotéticos e preparação para entrevistas, distinguindo-os de fatos da empresa. A suíte verifica preservação do histórico e conversão segura de referências; qualidade factual ainda exige avaliação das respostas reais.
+
+## Formatação do código
+
+O projeto usa Prettier e EditorConfig para manter indentação, quebras de linha e espaçamento consistentes.
+
+```bash
+npm run format
+npm run format:check
+```
+
+O primeiro comando formata os arquivos; o segundo verifica o padrão sem alterá-los. Arquivos gerados, imagens e variáveis de ambiente ficam fora da formatação.

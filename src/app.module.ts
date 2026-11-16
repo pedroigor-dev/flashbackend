@@ -6,8 +6,11 @@ import { ChatController } from './chat/chat.controller';
 import { ChatService } from './chat/chat.service';
 
 @Module({
-  imports:[ConfigModule.forRoot({isGlobal:true}),ThrottlerModule.forRoot([{ttl:60000,limit:20}])],
-  controllers:[ChatController],
-  providers:[ChatService,{provide:APP_GUARD,useClass:ThrottlerGuard}],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 20 }]),
+  ],
+  controllers: [ChatController],
+  providers: [ChatService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}
