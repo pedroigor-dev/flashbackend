@@ -183,7 +183,7 @@ NestJS organiza a API em controller e service. A configuração vem do `@nestjs/
 npm test
 ```
 
-O comando compila o backend e roda cinco testes com o runner do Node.js. Eles cobrem ausência de credencial, contexto enviado ao modelo, tratamento seguro de falhas, validação e limite de requisições, além da separação entre as credenciais dos provedores. As chamadas externas são simuladas nos testes; não é necessário gastar créditos.
+O comando compila o backend e roda sete testes com o runner do Node.js. Eles cobrem ausência de credencial, contexto enviado ao modelo, tratamento seguro de falhas, validação e limite de requisições, além da separação entre as credenciais dos provedores. As chamadas externas são simuladas nos testes; não é necessário gastar créditos.
 
 | Comando | Uso |
 | --- | --- |
@@ -194,7 +194,7 @@ O comando compila o backend e roda cinco testes com o runner do Node.js. Eles co
 
 ## Limites e decisões
 
-A base em `knowledge.ts` é enviada junto com a conversa. Não há busca na web em tempo real nem recuperação vetorial de documentos. Os links retornados são referências da base, não citações verificadas frase por frase. O modelo ainda pode errar.
+A base em `knowledge.ts` é enviada junto com a conversa. Não há busca na web em tempo real nem recuperação vetorial de documentos. O modelo indica os IDs das fontes usadas, e o servidor converte apenas IDs conhecidos em links da base. Isso evita URLs inventadas nos cartões de referências, mas não equivale a verificar cada frase gerada. O modelo ainda pode errar.
 
 O histórico permanece no navegador. A API não persiste conversas, não tem autenticação e não usa banco de dados. As mensagens e o histórico enviado passam pelo provedor configurado; o aplicativo não registra prompts e respostas em logs.
 
@@ -211,3 +211,11 @@ A escolha de Node.js, TypeScript e NestJS segue tecnologias citadas nas [vagas d
 [Pedro Igor](https://github.com/pedroigor-dev) · [Veja a experiência completa](https://github.com/pedroigor-dev/flashproject)
 
 </div>
+
+## Base de conhecimento ampliada
+
+Revisada em 16/11/2026, a base cobre história, cultura, ética, arquitetura, migração de sistemas, práticas de engenharia, vagas, produtos, benefícios e IA. Os resumos e links oficiais estão em `src/chat/knowledge.ts`. Incluem o Código de Conduta de outubro de 2025 e relatos técnicos publicados pela própria Flash.
+
+O conteúdo é uma fotografia das fontes consultadas, não uma pesquisa automática a cada pergunta. Para atualizar, revise a fonte original, corrija o resumo e a data de consulta e teste perguntas reais. Datas de publicação não devem ser confundidas com início de práticas. A base mantém o escopo e o período dos relatos; divergências não devem ser resolvidas por suposição.
+
+As respostas podem desenvolver conceitos, exemplos hipotéticos e preparação para entrevistas, distinguindo-os de fatos da empresa. A suíte verifica preservação do histórico e conversão segura de referências; qualidade factual ainda exige avaliação das respostas reais.

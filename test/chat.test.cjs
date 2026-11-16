@@ -73,3 +73,32 @@ test('Groq usa endpoint e credencial próprios, sem enviar token Hugging Face',a
     assert.ok(!JSON.stringify(result).includes('must-not-be-used'));
   } finally {global.fetch=original;}
 });
+
+test('referências pertencem à base e não aceitam links inventados pelo modelo',()=>{
+  const { resolveAnswer } = require('../dist/chat/knowledge');
+  const result=resolveAnswer('O código prevê proteção de dados. [fonte:etica] [fonte:etica] [fonte:https://malicioso.example]');
+  assert.equal(result.text,'O código prevê proteção de dados.');
+  assert.equal(result.sources.length,1);
+  assert.equal(result.sources[0].url,'https://canaldeetica.com.br/flash/files/Codigo_de_Conduta_e_Etica_V3.0.pdf');
+  assert.deepEqual(resolveAnswer('Olá!').sources,[]);
+});
+
+test('conversa preserva perguntas anteriores e inclui evidências para temas antes ausentes',async()=>{
+  const original=global.fetch;
+  global.fetch=async(url,init)=>{
+    const body=JSON.parse(init.body);
+    assert.match(body.messages[0].content,/Código de Conduta/);
+    assert.match(body.messages[0].content,/Flashstage/);
+    assert.match(body.messages[0].content,/ExpenseOn/);
+    assert.equal(body.messages[1].content,'Como funciona a engenharia?');
+    assert.equal(body.messages.at(-1).content,'E a migração na prática?');
+    return Response.json({choices:[{message:{content:'A migração foi incremental. [fonte:migracao]'}}]});
+  };
+  try {
+    const service=new ChatService(new ConfigService({AI_PROVIDER:'groq',GROQ_API_KEY:'test-only'}));
+    const result=await service.reply({messages:[{role:'user',content:'Como funciona a engenharia?'},{role:'assistant',content:'Vamos falar da plataforma.'},{role:'user',content:'E a migração na prática?'}]});
+    assert.equal(result.sources.length,1);
+    assert.match(result.sources[0].url,/construir-a-ponte/);
+    assert.ok(!result.text.includes('[fonte:'));
+  } finally {global.fetch=original;}
+});

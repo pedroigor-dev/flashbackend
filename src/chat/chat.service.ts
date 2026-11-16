@@ -1,7 +1,7 @@
 import { BadGatewayException, BadRequestException, GatewayTimeoutException, HttpException, Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ChatRequestDto } from './chat.dto';
-import { sources, systemPrompt } from './knowledge';
+import { resolveAnswer, systemPrompt } from './knowledge';
 
 @Injectable()
 export class ChatService {
@@ -23,7 +23,7 @@ export class ChatService {
       const response = await fetch(url, {
         method:'POST', signal,
         headers:{ Authorization:`Bearer ${token}`, 'Content-Type':'application/json' },
-        body:JSON.stringify({ model, messages:[{ role:'system', content:systemPrompt }, ...dto.messages], max_tokens:1600, temperature:0.45, stream:false, ...(provider === 'groq' ? {reasoning_effort:'low'} : {}) }),
+        body:JSON.stringify({ model, messages:[{ role:'system', content:systemPrompt }, ...dto.messages], max_tokens:2200, temperature:0.2, stream:false, ...(provider === 'groq' ? {reasoning_effort:'medium'} : {}) }),
       });
       if (!response.ok) {
         // Provider bodies can contain request details: never log or return them.
@@ -35,7 +35,9 @@ export class ChatService {
       const data = await response.json() as { choices?: { message?: { content?: unknown } }[] };
       const text = data.choices?.[0]?.message?.content;
       if (typeof text !== 'string' || !text.trim()) throw new BadGatewayException('A IA não retornou uma resposta. Tente novamente.');
-      return { text:text.trim(), sources, model, provider };
+      const answer = resolveAnswer(text);
+      if (!answer.text) throw new BadGatewayException('A IA não retornou uma resposta. Tente novamente.');
+      return { ...answer, model, provider };
     } catch(error) {
       if (error instanceof HttpException) throw error;
       if (signal.aborted) throw new GatewayTimeoutException('A resposta foi interrompida ou demorou demais. Tente novamente.');
