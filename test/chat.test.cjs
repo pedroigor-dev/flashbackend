@@ -109,7 +109,7 @@ test('Groq usa endpoint e credencial próprios, sem enviar token Hugging Face', 
 });
 
 test('referências pertencem à base e não aceitam links inventados pelo modelo', () => {
-  const { resolveAnswer } = require('../dist/chat/knowledge');
+  const { resolveAnswer } = require('../dist/chat/answer');
   const result = resolveAnswer(
     'O código prevê proteção de dados. [fonte:etica] [fonte:etica] [fonte:https://malicioso.example]',
   );

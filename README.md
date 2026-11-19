@@ -168,7 +168,9 @@ src/
     ├── chat.controller.ts   # Endpoints e cancelamento da chamada
     ├── chat.dto.ts          # Regras de entrada
     ├── chat.service.ts      # Provedores e tratamento de erros
-    └── knowledge.ts         # Prompt, base pública e referências
+    ├── knowledge.ts         # Base pública e fontes oficiais
+    ├── chat-context.ts      # Instruções e contexto enviados ao modelo
+    └── answer.ts            # Tratamento da resposta e referências
 test/
 └── chat.test.cjs             # Testes com node:test
 ```

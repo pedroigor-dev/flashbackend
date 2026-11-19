@@ -11,9 +11,15 @@ import {
 } from 'class-validator';
 
 export class ChatMessageDto {
-  @IsIn(['user', 'assistant']) role: 'user' | 'assistant';
-  @IsString() @MinLength(1) @MaxLength(4000) content: string;
+  @IsIn(['user', 'assistant'])
+  role: 'user' | 'assistant';
+
+  @IsString()
+  @MinLength(1)
+  @MaxLength(4000)
+  content: string;
 }
+
 export class ChatRequestDto {
   @IsArray()
   @ArrayMinSize(1)

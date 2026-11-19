@@ -16,5 +16,6 @@ export async function createApp() {
   app.enableShutdownHooks();
   return app;
 }
-if (require.main === module)
+if (require.main === module) {
   void createApp().then((app) => app.listen(Number(process.env.PORT || 4000), '127.0.0.1'));
+}
