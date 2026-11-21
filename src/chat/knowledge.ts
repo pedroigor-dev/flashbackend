@@ -4,6 +4,13 @@ export const reviewedAt = '2026-11-16';
 
 export const knowledge: KnowledgeEntry[] = [
   {
+    id: 'estorno',
+    title: 'Guia de estornos e cobranças duplicadas',
+    url: 'https://faq.flashapp.com.br/kb/guide/pt-BR/como-funciona-o-estorno-e-o-que-fazer-em-caso-de-cobranca-duplicada-YCKtRTryEC/Steps/4198154',
+    content: `Guia consultado em 21/11/2026. Quando uma compra é cancelada, duplicada ou recusada com débito de saldo, o primeiro passo é falar com o estabelecimento para solicitar o cancelamento e o comprovante. Somente o estabelecimento pode cancelar a transação. O guia informa prazo médio de até 20 dias úteis após a confirmação do cancelamento, envolvendo estabelecimento, operadora, bandeira e Flash. Não prometa esse prazo para todo tipo de transação. No extrato, o ícone amarelo indica estorno concluído; em cancelamentos totais o valor aparece riscado; estornos parciais ajustam o valor da compra. Para dúvidas sobre o saldo final, o guia orienta solicitar extrato detalhado pelo aplicativo.
+Neste projeto, a central /atendimento usa compras fictícias, guarda comprovantes de teste e organiza protocolos. Estados: waiting_merchant (usuário precisa falar com loja), waiting_receipt (aguardando comprovante fictício), queued (triagem na fila), reviewing (n8n confirmou encaminhamento para análise), completed (usuário acionou conclusão simulada). Não há integração com a Flash ou movimentação de dinheiro. O n8n não autentica comprovantes, não investiga fraude e não aprova estornos.`,
+  },
+  {
     id: 'historia',
     title: 'História e trajetória da Flash',
     url: 'https://flashapp.com.br/blog/gestao-360-flash',

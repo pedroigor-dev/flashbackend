@@ -1,3 +1,5 @@
+import { ChatService } from '../chat/chat.service';
+import { SupportQuestionDto } from './support.dto';
 import {
   Body,
   Controller,
@@ -27,6 +29,7 @@ export class SupportController {
     private readonly support: SupportService,
     private readonly storage: AttachmentStorage,
     private readonly config: ConfigService,
+    private readonly chat: ChatService,
   ) {}
 
   @Get()
@@ -103,6 +106,24 @@ export class SupportController {
     response.setHeader('Content-Type', file.type);
     response.setHeader('Content-Disposition', `attachment; filename="${file.name}"`);
     response.send(result.bytes);
+  }
+
+  @Post('cases/:id/advice')
+  async advice(
+    @Headers('x-support-session') token: string,
+    @Param('id') id: string,
+    @Body() dto: SupportQuestionDto,
+  ) {
+    const item = this.support.owned(id, this.support.session(token));
+    const { text, sources } = await this.chat.reply({
+      messages: [
+        {
+          role: 'user',
+          content: `Estou no ambiente demonstrativo de atendimento do projeto Flashinho. Nenhum dinheiro ou atendimento real está envolvido. Explique em texto simples, sem Markdown, usando o guia oficial de estornos. Não assuma que o arquivo foi validado ou que a devolução foi autorizada. Contexto do sistema: status=${item.status}; comprovantes=${item.attachments.length}. Minha pergunta é: ${dto.question}`,
+        },
+      ],
+    });
+    return { text, sources };
   }
 
   @Post('cases/:id/simulate')

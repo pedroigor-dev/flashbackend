@@ -1,3 +1,4 @@
+import { ChatModule } from '../chat/chat.module';
 import { Module } from '@nestjs/common';
 import { SupportStore } from './support.store';
 import { SupportService } from './support.service';
@@ -6,6 +7,7 @@ import { AttachmentStorage } from './attachment.storage';
 import { SupportWorker } from './support.worker';
 
 @Module({
+  imports: [ChatModule],
   controllers: [SupportController],
   providers: [SupportStore, SupportService, AttachmentStorage, SupportWorker],
 })

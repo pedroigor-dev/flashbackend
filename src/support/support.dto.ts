@@ -20,3 +20,10 @@ export class AutomationCallbackDto {
   @IsUUID()
   eventId: string;
 }
+
+export class SupportQuestionDto {
+  @IsString()
+  @MinLength(1)
+  @MaxLength(1000)
+  question: string;
+}
