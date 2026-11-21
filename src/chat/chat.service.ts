@@ -41,7 +41,7 @@ export class ChatService {
     return { provider, configured: Boolean(token), model };
   }
 
-  async reply(dto: ChatRequestDto, clientSignal?: AbortSignal) {
+  async reply(dto: ChatRequestDto, clientSignal?: AbortSignal, context = systemPrompt) {
     if (dto.messages.at(-1)?.role !== 'user' || dto.messages.some((m) => !m.content.trim())) {
       throw new BadRequestException('Envie uma pergunta válida para o Flashinho.');
     }
@@ -58,7 +58,7 @@ export class ChatService {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model,
-          messages: [{ role: 'system', content: systemPrompt }, ...dto.messages],
+          messages: [{ role: 'system', content: context }, ...dto.messages],
           max_tokens: 2200,
           temperature: 0.2,
           stream: false,

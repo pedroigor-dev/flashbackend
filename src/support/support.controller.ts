@@ -1,3 +1,4 @@
+import { supportContext } from './support-context';
 import { ChatService } from '../chat/chat.service';
 import { SupportQuestionDto } from './support.dto';
 import {
@@ -115,14 +116,11 @@ export class SupportController {
     @Body() dto: SupportQuestionDto,
   ) {
     const item = this.support.owned(id, this.support.session(token));
-    const { text, sources } = await this.chat.reply({
-      messages: [
-        {
-          role: 'user',
-          content: `Estou no ambiente demonstrativo de atendimento do projeto Flashinho. Nenhum dinheiro ou atendimento real está envolvido. Explique em texto simples, sem Markdown, usando o guia oficial de estornos. Não assuma que o arquivo foi validado ou que a devolução foi autorizada. Contexto do sistema: status=${item.status}; comprovantes=${item.attachments.length}. Minha pergunta é: ${dto.question}`,
-        },
-      ],
-    });
+    const { text, sources } = await this.chat.reply(
+      { messages: [{ role: 'user', content: dto.question }] },
+      undefined,
+      supportContext(item),
+    );
     return { text, sources };
   }
 
