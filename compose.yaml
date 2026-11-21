@@ -1,0 +1,19 @@
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:2.48.7
+    ports:
+      - '127.0.0.1:5678:5678'
+    environment:
+      N8N_HOST: localhost
+      N8N_LISTEN_ADDRESS: 0.0.0.0
+      N8N_PROTOCOL: http
+      N8N_SECURE_COOKIE: 'false'
+      N8N_DIAGNOSTICS_ENABLED: 'false'
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: 'true'
+      GENERIC_TIMEZONE: America/Bahia
+      TZ: America/Bahia
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./data/n8n-import:/imports:ro
+volumes:
+  n8n_data:

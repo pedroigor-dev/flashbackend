@@ -64,10 +64,7 @@
               "Action": "s3:*",
               "Resource": [
                 {
-                  "Fn::GetAtt": [
-                    "Receipts",
-                    "Arn"
-                  ]
+                  "Fn::GetAtt": ["Receipts", "Arn"]
                 },
                 {
                   "Fn::Sub": "${Receipts.Arn}/*"
@@ -107,10 +104,7 @@
         "SqsManagedSseEnabled": true,
         "RedrivePolicy": {
           "deadLetterTargetArn": {
-            "Fn::GetAtt": [
-              "DeadLetters",
-              "Arn"
-            ]
+            "Fn::GetAtt": ["DeadLetters", "Arn"]
           },
           "maxReceiveCount": 5
         },
@@ -140,11 +134,7 @@
               "Statement": [
                 {
                   "Effect": "Allow",
-                  "Action": [
-                    "s3:PutObject",
-                    "s3:GetObject",
-                    "s3:DeleteObject"
-                  ],
+                  "Action": ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"],
                   "Resource": {
                     "Fn::Sub": "${Receipts.Arn}/refunds/*"
                   }
@@ -158,10 +148,7 @@
                     "sqs:GetQueueAttributes"
                   ],
                   "Resource": {
-                    "Fn::GetAtt": [
-                      "RefundQueue",
-                      "Arn"
-                    ]
+                    "Fn::GetAtt": ["RefundQueue", "Arn"]
                   }
                 }
               ]

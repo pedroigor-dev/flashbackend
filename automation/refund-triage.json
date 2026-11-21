@@ -1,0 +1,98 @@
+{
+  "id": "flashinho-refund-triage",
+  "name": "Flashinho - Triagem de estornos",
+  "active": false,
+  "nodes": [
+    {
+      "id": "refund-webhook",
+      "name": "Receber comprovante",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [0, 0],
+      "webhookId": "flashinho-refund-webhook",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "flashinho-refunds",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "flashinho-automation",
+          "name": "Flashinho automation"
+        }
+      }
+    },
+    {
+      "id": "refund-callback",
+      "name": "Registrar encaminhamento",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [260, 0],
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:4000/api/support/automation/{{ $json.body.caseId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { eventId: $json.body.id } }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "flashinho-automation",
+          "name": "Flashinho automation"
+        }
+      }
+    },
+    {
+      "id": "refund-response",
+      "name": "Confirmar processamento",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [520, 0],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Receber comprovante": {
+      "main": [
+        [
+          {
+            "node": "Registrar encaminhamento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar encaminhamento": {
+      "main": [
+        [
+          {
+            "node": "Confirmar processamento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "none",
+    "saveManualExecutions": false
+  },
+  "pinData": {}
+}
