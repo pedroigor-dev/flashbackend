@@ -233,6 +233,8 @@ O primeiro comando formata os arquivos; o segundo verifica o padrão sem alterá
 
 ## Central de atendimento e estornos
 
+![Central de atendimento com acompanhamento de estornos](docs/images/support.jpg)
+
 A API agora também acompanha solicitações demonstrativas de estorno: protocolo, etapas, comprovantes privados, triagem no n8n e orientação contextual com o Flashinho. A persistência usa SQLite e outbox transacional; na AWS, os arquivos ficam no S3 e os eventos passam pelo SQS com fila de falhas. A conclusão é uma simulação acionada pelo usuário.
 
 O fluxo completo, a configuração local e Docker, os recursos AWS e os limites desta POC estão no [guia da central](docs/support.md). É necessário Node.js 24 ou superior para esse módulo.
