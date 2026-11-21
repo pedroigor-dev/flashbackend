@@ -110,3 +110,7 @@ O worker pressupõe uma única instância de backend e o mesmo banco local para 
 ## Validação
 
 `npm test` executa testes isolados sem consumir AWS ou IA. Cobre autorização por sessão, idempotência, transições inválidas, callback duplicado, confirmação do worker e validação de arquivos. A execução de ponta a ponta com serviços reais é feita separadamente com arquivos fictícios. A referência funcional é o [guia público de estornos da Flash](https://faq.flashapp.com.br/kb/guide/pt-BR/como-funciona-o-estorno-e-o-que-fazer-em-caso-de-cobranca-duplicada-YCKtRTryEC/Steps/4198154), consultado em 21/11/2026.
+
+### Teste com os serviços reais
+
+Com backend, AWS e workflow n8n em execução, rode `npm run test:integration`. O teste cria uma sessão e um atendimento fictícios, verifica a idempotência, envia o PDF de teste ao S3, baixa por link assinado, aguarda SQS/n8n, encerra a simulação e tenta acessar o anexo por outra sessão. Ele consome serviços AWS e deixa o protocolo de teste no banco; o arquivo é removido pelo ciclo de vida do bucket. Não faz parte de `npm test`.
