@@ -1,3 +1,4 @@
+import { SupportModule } from './support/support.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
@@ -7,6 +8,7 @@ import { ChatService } from './chat/chat.service';
 
 @Module({
   imports: [
+    SupportModule,
     ConfigModule.forRoot({ isGlobal: true }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 20 }]),
   ],
