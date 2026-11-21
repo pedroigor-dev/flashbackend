@@ -59,7 +59,7 @@ docker compose up -d
 
 O editor fica em `http://localhost:5678`. Conclua a criação do proprietário diretamente no editor para acessar a interface. As portas estão limitadas ao computador local. `N8N_SECURE_COOKIE=false` atende somente ao HTTP local; uma publicação precisa de HTTPS e cookies seguros.
 
-O workflow recebe apenas `id` do evento e `caseId`; não recebe arquivo, descrição, dados de cartão ou a credencial AWS. O Header Auth protege entrada e callback. O HTTP Request registra o encaminhamento e o Respond to Webhook devolve a confirmação. A triagem não valida a autenticidade do comprovante nem decide o estorno. Os dados das execuções bem-sucedidas e com erro não são persistidos pelo workflow.
+O workflow recebe apenas `id` do evento e `caseId`; não recebe arquivo, descrição, dados de cartão ou a credencial AWS. O Header Auth protege entrada e callback. O HTTP Request registra o encaminhamento e o Respond to Webhook devolve a confirmação. A triagem não valida a autenticidade do comprovante nem decide o estorno. O histórico de execuções bem-sucedidas, com erro e manuais está habilitado, incluindo o progresso dos nós, para acompanhar a demonstração na aba Executions. A execução do webhook também registra seus headers: mantenha o editor e o banco do n8n privados, pois podem conter a credencial de automação. Antes de compartilhar capturas ou exportações de uma execução, oculte esses headers. O workflow não recebe a credencial AWS nem o comprovante.
 
 ### Alternativa local sem Docker
 
@@ -114,3 +114,7 @@ O worker pressupõe uma única instância de backend e o mesmo banco local para 
 ### Teste com os serviços reais
 
 Com backend, AWS e workflow n8n em execução, rode `npm run test:integration`. O teste cria uma sessão e um atendimento fictícios, verifica a idempotência, envia o PDF de teste ao S3, baixa por link assinado, aguarda SQS/n8n, encerra a simulação e tenta acessar o anexo por outra sessão. Ele consome serviços AWS e deixa o protocolo de teste no banco; o arquivo é removido pelo ciclo de vida do bucket. Não faz parte de `npm test`.
+
+### Acompanhar a automação
+
+Abra o workflow Flashinho - Triagem de estornos e selecione **Executions**. Deixe **Auto refresh** ativado, se a opção estiver disponível. Ao enviar um comprovante pela central, o SQS dispara o processamento e uma nova execução aparece nessa lista. Selecione-a para inspecionar os três nós. A confirmação esperada é `processed: true`, com o ID do evento. Não use Execute workflow para o fluxo normal do site: esse botão inicia o listener de teste, enquanto o backend chama o webhook publicado. Execuções anteriores à habilitação do histórico não ganham dados retroativamente.
