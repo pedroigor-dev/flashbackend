@@ -1,3 +1,5 @@
+process.env.SUPPORT_DATABASE = ':memory:';
+process.env.SUPPORT_WORKER_ENABLED = 'false';
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { ConfigService } = require('@nestjs/config');

@@ -66,6 +66,8 @@ export class AttachmentStorage {
     return {
       id,
       key,
+      storage: this.bucket ? 's3' : 'local',
+      ...(this.bucket ? { bucket: this.bucket } : {}),
       type,
       size: file.size,
       name: file.originalname.replace(/[^a-zA-Z0-9._ -]/g, '_').slice(0, 100) || 'comprovante',
@@ -73,20 +75,20 @@ export class AttachmentStorage {
   }
 
   async remove(file: Attachment) {
-    if (this.bucket) {
-      await this.client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: file.key }));
+    if (file.storage === 's3') {
+      await this.client.send(new DeleteObjectCommand({ Bucket: file.bucket, Key: file.key }));
     } else {
       await unlink(resolve(this.directory, file.id));
     }
   }
 
   async download(file: Attachment) {
-    if (this.bucket) {
+    if (file.storage === 's3') {
       return {
         url: await getSignedUrl(
           this.client,
           new GetObjectCommand({
-            Bucket: this.bucket,
+            Bucket: file.bucket,
             Key: file.key,
             ResponseContentDisposition: `attachment; filename="${file.name}"`,
           }),

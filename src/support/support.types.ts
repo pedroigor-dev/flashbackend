@@ -1,7 +1,15 @@
 export type RefundStatus =
   'waiting_merchant' | 'waiting_receipt' | 'queued' | 'reviewing' | 'completed';
 export type RefundEvent = { id: string; title: string; detail: string; at: string };
-export type Attachment = { id: string; name: string; type: string; size: number; key: string };
+export type Attachment = {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  key: string;
+  storage?: 'local' | 's3';
+  bucket?: string;
+};
 export type RefundCase = {
   id: string;
   protocol: string;

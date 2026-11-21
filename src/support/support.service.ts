@@ -29,7 +29,7 @@ export class SupportService {
     const { session, ...data } = item;
     return {
       ...data,
-      attachments: data.attachments.map(({ key, ...file }) => file),
+      attachments: data.attachments.map(({ key, bucket, storage, ...file }) => file),
       transaction: transactions.find((tx) => tx.id === item.transactionId),
     };
   }
