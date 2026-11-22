@@ -26,19 +26,19 @@ export type RefundCase = {
 export const transactions = [
   {
     id: 'tx-market',
-    merchant: 'Mercado do Bairro',
+    merchant: 'Hiperideal Barra',
     category: 'Alimentação',
     amount: 18490,
     date: '2026-11-18',
-    initials: 'MB',
+    initials: 'HB',
   },
   {
     id: 'tx-delivery',
-    merchant: 'Mesa & Companhia',
-    category: 'Refeição',
+    merchant: 'Mercantil Atacado Pirajá',
+    category: 'Alimentação',
     amount: 6290,
     date: '2026-11-19',
-    initials: 'MC',
+    initials: 'MA',
   },
   {
     id: 'tx-cafe',
