@@ -1,4 +1,4 @@
-import { supportContext } from './support-context';
+import { answerCurrentStep, supportContext } from './support-context';
 import { ChatService } from '../chat/chat.service';
 import { SupportQuestionDto } from './support.dto';
 import {
@@ -116,6 +116,11 @@ export class SupportController {
     @Body() dto: SupportQuestionDto,
   ) {
     const item = this.support.owned(id, this.support.session(token));
+    const currentStep = answerCurrentStep(item, dto.question);
+    if (currentStep) {
+      return { text: currentStep, sources: [] };
+    }
+
     const { text, sources } = await this.chat.reply(
       { messages: [...(dto.history ?? []), { role: 'user', content: dto.question }] },
       undefined,

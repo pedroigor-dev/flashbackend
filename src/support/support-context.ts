@@ -3,25 +3,40 @@ import { knowledge } from '../chat/knowledge';
 
 const nextSteps = {
   waiting_merchant:
-    'Peça o cancelamento ao estabelecimento. Só após a loja confirmar, clique em “A loja confirmou o cancelamento”. A próxima etapa da central é “Comprovante pendente”. A triagem só pode começar depois do envio do comprovante de teste.',
+    'Seu protocolo está em “Aguardando a loja”. Quando o estabelecimento confirmar o cancelamento, clique em “A loja confirmou o cancelamento” e anexe o comprovante de teste.',
   waiting_receipt:
-    'Anexe um comprovante fictício de cancelamento, PDF, PNG ou JPEG de até 5 MB. O envio coloca o protocolo na fila de triagem.',
+    'Seu protocolo está em “Comprovante pendente”. Anexe um comprovante fictício de cancelamento em PDF, PNG ou JPEG de até 5 MB para entrar na fila de triagem.',
   queued:
-    'O comprovante de teste está salvo. O sistema aguarda a triagem automática do n8n. A página atualiza o histórico periodicamente.',
+    'Seu comprovante de teste foi recebido e está na fila de triagem do n8n. Aguarde a atualização na linha do tempo.',
   reviewing:
-    'O n8n já registrou o encaminhamento demonstrativo. O próximo passo disponível é o botão Simular conclusão. Não existe uma equipe real analisando este protocolo nem aprovação financeira pendente.',
+    'Seu protocolo está “Em análise” na demonstração. O n8n já concluiu a triagem. Clique em “Simular conclusão” para marcar o caso de teste como concluído. Nenhum saldo real será alterado.',
   completed:
     'A pessoa já acionou a conclusão simulada. O atendimento demonstrativo terminou, sem movimentar saldo ou dinheiro.',
 };
+
+export function answerCurrentStep(item: RefundCase, question: string) {
+  const normalized = question
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .trim()
+    .replace(/[?.!]+$/, '');
+  const asksForStep =
+    /^(?:qual (?:e )?(?:a etapa|o status) (?:do meu|deste) (?:estorno|protocolo)(?: agora)?(?: e o que (?:eu )?preciso fazer)?|qual (?:e )?o proximo passo|o que (?:eu )?(?:faco|preciso fazer) agora)$/.test(
+      normalized,
+    );
+
+  return asksForStep ? nextSteps[item.status] : undefined;
+}
 
 export function supportContext(item: RefundCase) {
   return `Você é o Flashinho, assistente de uma POC independente com compras fictícias. Responda à pergunta em português brasileiro, texto simples, sem Markdown, em até 150 palavras.
 
 CONTEXTO CONFIÁVEL DO SERVIDOR
-Próximo passo deste protocolo: ${nextSteps[item.status]}
+Etapa e próximo passo deste protocolo: ${nextSteps[item.status]}
 Comprovantes de teste recebidos: ${item.attachments.length}.
-Esta central não se conecta aos sistemas da Flash. Não existe equipe real analisando casos nesta POC, nenhum atendente entrará em contato e o sistema não verifica autenticidade de comprovantes. A triagem apenas organiza um encaminhamento demonstrativo. O botão Simular conclusão não autoriza nem executa devoluções, não altera saldo e não produz alterações no aplicativo oficial.
-Ao perguntar o próximo passo, explique a ação disponível na nossa central. Não mostre nomes de estados internos em inglês. Nunca diga que um estorno será efetivado, aprovado ou lançado no extrato por esta aplicação. Explique separadamente o procedimento real do guia apenas quando a pergunta exigir, chamando-o de orientação geral do guia oficial. Nunca prometa prazo ou devolução. Não misture o protocolo fictício com uma transação real.
+Esta central não se conecta aos sistemas da Flash. Não existe uma equipe real analisando casos nesta POC, nenhum atendente entrará em contato e o sistema não verifica autenticidade de comprovantes. A triagem apenas organiza um encaminhamento demonstrativo. O botão Simular conclusão não autoriza nem executa devoluções, não altera saldo e não produz alterações no aplicativo oficial.
+Quando perguntarem sobre este protocolo, informe o nome da etapa atual e a ação disponível na central. Se o relato mencionar uma etapa anterior, esclareça a diferença usando o estado atual do servidor. “Simular conclusão” marca o caso de teste como concluído. A triagem do n8n ocorre antes disso. Não mostre nomes de estados internos em inglês. Nunca diga que um estorno será efetivado, aprovado ou lançado no extrato por esta aplicação. Use o guia oficial somente se o usuário perguntar explicitamente sobre o processo real da Flash, mesmo se a conversa mencionar cobrança duplicada ou cancelamento. Nunca prometa prazo ou devolução.
 
 GUIA OFICIAL PARA EXPLICAÇÕES GERAIS
 ${knowledge.find((entry) => entry.id === 'estorno')?.content}

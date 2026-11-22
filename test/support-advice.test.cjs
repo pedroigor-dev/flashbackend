@@ -2,7 +2,22 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { ChatService } = require('../dist/chat/chat.service');
 const { ConfigService } = require('@nestjs/config');
-const { supportContext } = require('../dist/support/support-context');
+const { answerCurrentStep, supportContext } = require('../dist/support/support-context');
+
+test('a mesma pergunta acompanha a etapa registrada no protocolo', () => {
+  const question = 'Qual é a etapa do meu estorno agora e o que eu preciso fazer?';
+  assert.match(answerCurrentStep({ status: 'waiting_merchant' }, question), /Aguardando a loja/);
+  assert.match(answerCurrentStep({ status: 'waiting_receipt' }, question), /Comprovante pendente/);
+  const reviewing = answerCurrentStep({ status: 'reviewing' }, question);
+  assert.match(reviewing, /Em análise/);
+  assert.match(reviewing, /marcar o caso de teste como concluído/);
+  assert.doesNotMatch(reviewing, /peça o cancelamento|dias úteis/i);
+  assert.equal(
+    answerCurrentStep({ status: 'reviewing' }, 'Como funciona um estorno de verdade na Flash?'),
+    undefined,
+  );
+});
+
 test('orientação do protocolo usa instruções próprias e não atribui devoluções reais à POC', async () => {
   const original = global.fetch;
   try {
