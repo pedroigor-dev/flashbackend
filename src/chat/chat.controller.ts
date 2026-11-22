@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Post, Res } from '@nestjs/common';
 import { ChatRequestDto } from './chat.dto';
 import { ChatService } from './chat.service';
 import type { Response } from 'express';
+import { chatStream, wantsChatStream } from './chat-stream';
 
 @Controller()
 export class ChatController {
@@ -16,9 +17,15 @@ export class ChatController {
   async reply(
     @Body()
     dto: ChatRequestDto,
+    @Headers('accept') accept: string | undefined,
     @Res({ passthrough: true })
     response: Response,
   ) {
+    if (wantsChatStream(accept)) {
+      return chatStream(response, (signal, onText) =>
+        this.chat.reply(dto, signal, undefined, onText),
+      );
+    }
     const controller = new AbortController();
     const onClose = () => {
       if (!response.writableEnded) {

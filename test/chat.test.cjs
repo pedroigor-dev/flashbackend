@@ -110,6 +110,55 @@ test('Groq usa endpoint e credencial próprios, sem enviar token Hugging Face', 
   }
 });
 
+test('streaming entrega texto antes do fim e filtra marcadores divididos em partes', async () => {
+  const original = global.fetch;
+  const encoder = new TextEncoder();
+  const { promise: firstText, resolve: receiveFirstText } = Promise.withResolvers();
+  let upstream;
+  global.fetch = async (_, init) => {
+    assert.equal(JSON.parse(init.body).stream, true);
+    return new Response(
+      new ReadableStream({
+        start(controller) {
+          upstream = controller;
+          controller.enqueue(
+            encoder.encode('data: {"choices":[{"delta":{"reasoning":"não publicar"}}]}\n\n'),
+          );
+          controller.enqueue(
+            encoder.encode('data: {"choices":[{"delta":{"content":"A Flash"}}]}\n\n'),
+          );
+        },
+      }),
+    );
+  };
+  try {
+    const service = new ChatService(
+      new ConfigService({ AI_PROVIDER: 'groq', GROQ_API_KEY: 'test-only' }),
+    );
+    const previews = [];
+    const pending = service.reply(request, undefined, undefined, (text) => {
+      previews.push(text);
+      receiveFirstText(text);
+    });
+    assert.equal(await Promise.race([firstText, pending]), 'A Flash');
+    upstream.enqueue(
+      encoder.encode('data: {"choices":[{"delta":{"content":" orienta sobre estornos. [fon"}}]}\n'),
+    );
+    upstream.enqueue(
+      encoder.encode(
+        'data: {"choices":[{"delta":{"content":"te:estorno]"},"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n',
+      ),
+    );
+    upstream.close();
+    const answer = await pending;
+    assert.deepEqual(previews, ['A Flash', 'A Flash orienta sobre estornos.']);
+    assert.equal(answer.text, previews.at(-1));
+    assert.equal(answer.sources.length, 1);
+  } finally {
+    global.fetch = original;
+  }
+});
+
 test('referências pertencem à base e não aceitam links inventados pelo modelo', () => {
   const { resolveAnswer } = require('../dist/chat/answer');
   const result = resolveAnswer(

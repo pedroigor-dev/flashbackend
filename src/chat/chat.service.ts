@@ -10,6 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import { ChatRequestDto } from './chat.dto';
 import { resolveAnswer } from './answer';
 import { systemPrompt } from './chat-context';
+import { readProviderStream } from './chat-stream';
 
 @Injectable()
 export class ChatService {
@@ -41,7 +42,12 @@ export class ChatService {
     return { provider, configured: Boolean(token), model };
   }
 
-  async reply(dto: ChatRequestDto, clientSignal?: AbortSignal, context = systemPrompt) {
+  async reply(
+    dto: ChatRequestDto,
+    clientSignal?: AbortSignal,
+    context = systemPrompt,
+    onText?: (text: string) => void,
+  ) {
     if (dto.messages.at(-1)?.role !== 'user' || dto.messages.some((m) => !m.content.trim())) {
       throw new BadRequestException('Envie uma pergunta válida para o Flashinho.');
     }
@@ -74,7 +80,7 @@ export class ChatService {
           messages: [{ role: 'system', content: context }, ...dto.messages],
           max_tokens: 2200,
           temperature: 0.2,
-          stream: false,
+          stream: Boolean(onText),
           ...(provider === 'groq' ? { reasoning_effort: 'medium' } : {}),
         }),
       });
@@ -99,8 +105,27 @@ export class ChatService {
           'O provedor de IA está indisponível. Tente novamente em instantes.',
         );
       }
-      const data = (await response.json()) as { choices?: { message?: { content?: unknown } }[] };
-      const text = data.choices?.[0]?.message?.content;
+      let text: unknown;
+      if (onText && response.body) {
+        let raw = '';
+        let previous = '';
+        await readProviderStream(response.body, (delta) => {
+          raw += delta;
+          const open = raw.lastIndexOf('[');
+          const tail = raw.slice(open);
+          const unfinishedMarker =
+            open > raw.lastIndexOf(']') && !tail.includes('\n') && tail.length < 96;
+          const preview = resolveAnswer(unfinishedMarker ? raw.slice(0, open) : raw).text;
+          if (preview !== previous) {
+            previous = preview;
+            onText(preview);
+          }
+        });
+        text = raw;
+      } else {
+        const data = (await response.json()) as { choices?: { message?: { content?: unknown } }[] };
+        text = data.choices?.[0]?.message?.content;
+      }
       if (typeof text !== 'string' || !text.trim()) {
         throw new BadGatewayException('A IA não retornou uma resposta. Tente novamente.');
       }

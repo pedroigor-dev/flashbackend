@@ -1,5 +1,6 @@
 import { answerCurrentStep, supportContext } from './support-context';
 import { ChatService } from '../chat/chat.service';
+import { chatStream, wantsChatStream } from '../chat/chat-stream';
 import { SupportQuestionDto } from './support.dto';
 import {
   Body,
@@ -112,8 +113,10 @@ export class SupportController {
   @Post('cases/:id/advice')
   async advice(
     @Headers('x-support-session') token: string,
+    @Headers('accept') accept: string | undefined,
     @Param('id') id: string,
     @Body() dto: SupportQuestionDto,
+    @Res({ passthrough: true }) response: Response,
   ) {
     const item = this.support.owned(id, this.support.session(token));
     const currentStep = answerCurrentStep(item, dto.question);
@@ -121,11 +124,17 @@ export class SupportController {
       return { text: currentStep, sources: [] };
     }
 
-    const { text, sources } = await this.chat.reply(
-      { messages: [...(dto.history ?? []), { role: 'user', content: dto.question }] },
-      undefined,
-      supportContext(item),
-    );
+    const request = {
+      messages: [...(dto.history ?? []), { role: 'user' as const, content: dto.question }],
+    };
+    const context = supportContext(item);
+    if (wantsChatStream(accept)) {
+      return chatStream(response, (signal, onText) =>
+        this.chat.reply(request, signal, context, onText),
+      );
+    }
+
+    const { text, sources } = await this.chat.reply(request, undefined, context);
     return { text, sources };
   }
 
