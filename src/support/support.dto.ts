@@ -1,4 +1,17 @@
-import { IsBoolean, IsIn, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  ArrayMaxSize,
+  IsArray,
+  IsBoolean,
+  IsIn,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+  MinLength,
+  ValidateNested,
+} from 'class-validator';
+import { ChatMessageDto } from '../chat/chat.dto';
 
 export class CreateRefundDto {
   @IsIn(['tx-market', 'tx-delivery', 'tx-cafe'])
@@ -26,4 +39,11 @@ export class SupportQuestionDto {
   @MinLength(1)
   @MaxLength(1000)
   question: string;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(12)
+  @ValidateNested({ each: true })
+  @Type(() => ChatMessageDto)
+  history?: ChatMessageDto[];
 }

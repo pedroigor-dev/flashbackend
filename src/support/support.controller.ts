@@ -117,7 +117,7 @@ export class SupportController {
   ) {
     const item = this.support.owned(id, this.support.session(token));
     const { text, sources } = await this.chat.reply(
-      { messages: [{ role: 'user', content: dto.question }] },
+      { messages: [...(dto.history ?? []), { role: 'user', content: dto.question }] },
       undefined,
       supportContext(item),
     );
