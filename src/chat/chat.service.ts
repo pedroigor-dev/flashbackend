@@ -46,6 +46,19 @@ export class ChatService {
       throw new BadRequestException('Envie uma pergunta válida para o Flashinho.');
     }
     const { token, model, provider, url } = this.settings();
+    const question = dto.messages.at(-1)?.content ?? '';
+    if (context === systemPrompt && /\bsimular\s+conclus[aã]o\b/i.test(question)) {
+      const describedAsReviewing = /\bem an[aá]lise\b/i.test(question);
+      const explanation = describedAsReviewing
+        ? 'Se o protocolo está **Em análise**, o n8n já registrou o encaminhamento da triagem. Você pode encerrar o teste assim que o botão aparecer.'
+        : 'Confira a linha do tempo do seu protocolo na **Central de atendimento**. Quando a triagem terminar, o botão estará disponível na demonstração.';
+      return {
+        text: `${explanation}\n\n**Simular conclusão** encerra apenas o protocolo de teste. O dinheiro não volta para o saldo, e nenhum estorno é lançado no extrato. Para consultar a etapa atual, abra o protocolo e use **Perguntar ao Flashinho** naquela tela.`,
+        sources: [],
+        model,
+        provider,
+      };
+    }
     if (!token) {
       throw new ServiceUnavailableException('A conexão com a IA ainda não foi configurada.');
     }
