@@ -35,12 +35,28 @@ export class SupportWorker implements OnModuleInit, OnModuleDestroy {
     if (!url || !token) {
       throw new Error('Configure o webhook e a credencial do n8n.');
     }
-    const response = await fetch(url, {
+    const request: RequestInit = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-automation-token': token },
       body: JSON.stringify(event),
       signal: AbortSignal.any([this.abort.signal, AbortSignal.timeout(15000)]),
-    });
+    };
+    const editorEnabled =
+      this.config.get('SUPPORT_DEMO_ENABLED', 'true') === 'true' &&
+      this.config.get('N8N_REFUND_LIVE_DEMO', 'false') === 'true';
+    const editorUrl = editorEnabled ? new URL(url) : undefined;
+    let response: Response | undefined;
+    if (editorUrl?.pathname.includes('/webhook/')) {
+      editorUrl.pathname = editorUrl.pathname.replace('/webhook/', '/webhook-test/');
+      response = await fetch(editorUrl, request);
+      if (response.status === 404) {
+        const error = await response.json().catch(() => undefined);
+        if (/^The requested webhook .+ is not registered\.$/.test(error?.message ?? '')) {
+          response = undefined;
+        }
+      }
+    }
+    response ??= await fetch(url, request);
     if (!response.ok) {
       throw new Error('Falha no workflow de triagem.');
     }

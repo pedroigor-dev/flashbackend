@@ -61,6 +61,14 @@ O editor fica em `http://localhost:5678`. Conclua a criação do proprietário d
 
 O workflow recebe apenas `id` do evento e `caseId`; não recebe arquivo, descrição, dados de cartão ou a credencial AWS. O Header Auth protege entrada e callback. O HTTP Request registra o encaminhamento e o Respond to Webhook devolve a confirmação. A triagem não valida a autenticidade do comprovante nem decide o estorno. O histórico de execuções bem-sucedidas, com erro e manuais está habilitado, incluindo o progresso dos nós, para acompanhar a demonstração na aba Executions. A execução do webhook também registra seus headers: mantenha o editor e o banco do n8n privados, pois podem conter a credencial de automação. Antes de compartilhar capturas ou exportações de uma execução, oculte esses headers. O workflow não recebe a credencial AWS nem o comprovante.
 
+### Acompanhar a triagem no modo demo
+
+Gere a versão de demonstração com `node scripts/prepare-n8n.cjs --demo`. Importe o `workflow.json` gerado e publique o workflow com os comandos acima. Se a credencial já estiver cadastrada no n8n, reutilize-a.
+
+O modo demo insere duas esperas de quatro segundos, uma antes de registrar o encaminhamento e outra antes de enviar a confirmação ao worker. Para ver os nós mudando de cor, configure `N8N_REFUND_LIVE_DEMO=true` no `.env` do backend e reinicie-o. No **Editor** do n8n, clique em **Execute workflow** e aguarde aparecer **Waiting for trigger event**. Com o editor aberto, envie um comprovante de teste pela central em outra aba. O backend usa o webhook de teste quando o editor está escutando e o webhook publicado nos demais envios. Clique em **Execute workflow** de novo antes de repetir o teste.
+
+A aba **Executions** mostra o histórico e o status da execução. Para voltar ao fluxo rápido, desative `N8N_REFUND_LIVE_DEMO`, reinicie o backend e publique o workflow gerado sem `--demo`.
+
 ### Alternativa local sem Docker
 
 Para desenvolvimento, a versão 2.48.7 também pode ser executada pelo Node, embora o fornecedor esteja descontinuando esse modo. Configure `N8N_USER_FOLDER` para uma pasta privada dentro de `data/`, `N8N_LISTEN_ADDRESS=127.0.0.1`, `N8N_DIAGNOSTICS_ENABLED=false` e `N8N_SECURE_COOKIE=false`. Execute os mesmos comandos `import:credentials`, `import:workflow`, `publish:workflow` e `start` com `npx --yes --package=n8n@2.48.7 n8n`. Em produção, prefira a imagem oficial e configure os task runners externos caso use nós de código; este workflow utiliza apenas nós HTTP e Webhook.

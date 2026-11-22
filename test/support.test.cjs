@@ -113,6 +113,22 @@ test('worker sÃ³ confirma entrega depois do callback; falhas permanecem recuperÃ
     };
     await worker.dispatch(payload);
     assert.equal(store.find(item.id).status, 'reviewing');
+
+    config.set('N8N_REFUND_WEBHOOK_URL', 'http://localhost:5678/webhook/flashinho-refunds');
+    config.set('N8N_REFUND_LIVE_DEMO', 'true');
+    const called = [];
+    global.fetch = async (url) => {
+      called.push(new URL(url).pathname);
+      if (called.length === 1) {
+        return Response.json(
+          { message: 'The requested webhook "flashinho-refunds" is not registered.' },
+          { status: 404 },
+        );
+      }
+      return Response.json({ eventId: event.id, processed: true });
+    };
+    await worker.dispatch(payload);
+    assert.deepEqual(called, ['/webhook-test/flashinho-refunds', '/webhook/flashinho-refunds']);
   } finally {
     global.fetch = original;
     worker.onModuleDestroy();
